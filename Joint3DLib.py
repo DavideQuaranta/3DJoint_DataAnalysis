@@ -38,22 +38,22 @@ def ExpConst(x, a, tau, c):
 def fitSheet(directory, sheet, initial, f = singleExp, cut = None, verbose = False):
     file = pd.ExcelFile(directory)
     sheets = file.sheet_names
-    
+
     if int(sheet[5:]) > int(sheets[-1][5:]):
         print(f'Error : This file has {sheets[-1][5:]} sheets! {sheet} does not exist!')
         return
-    
+
     data = pd.read_excel(directory, sheet_name = sheet)
-    
+
     v = np.array(data['Voltage'])
-    t = np.array(data['Time']) 
+    t = np.array(data['Time'])
     if cut != 0:
         t = np.array(t[v<cut])
         v = v[v<cut]
     v_error = np.array([error(val) for val in v])
-    
-       
-    
+
+
+
     T = data['T']
     T_value = np.mean(T)
     T_error = abs(T[1]-T[0])/2
@@ -65,7 +65,7 @@ def fitSheet(directory, sheet, initial, f = singleExp, cut = None, verbose = Fal
     v_unit = "mVpp"
     T_unit = "K"
     f_unit = "Hz"
-    
+
     resval,rescov = curve_fit(f, t, v, initial, sigma = v_error)
     reserr = np.sqrt(np.diag(rescov))
     dof = len(v) - len(initial)
@@ -73,7 +73,7 @@ def fitSheet(directory, sheet, initial, f = singleExp, cut = None, verbose = Fal
 
     Q_value = f_0*resval[1]*np.pi
     Q_error = Q_value*np.sqrt( (reserr[0]/resval[0])**2 + (errf_0/f_0)**2 )
-    
+
     if verbose == True:
         print('--------------------------------------------------')
         print(f'Fit of Sheet{sheet_num} from {directory[-10:-5]}')
@@ -83,30 +83,30 @@ def fitSheet(directory, sheet, initial, f = singleExp, cut = None, verbose = Fal
         print('--------------------------------------------------')
     else:
         return Q_value, Q_error, T_value, T_error, chi_norm
-    
-    
-    
-    
-    
-    
-    
-def plotSheet(directory, sheet, initial, f = singleExp, cut = 0, save = False):
+
+
+
+
+
+
+
+def plotSheet(directory, sheet, initial, f = singleExp, cut = 0, save = ''):
     file = pd.ExcelFile(directory)
     sheets = file.sheet_names
-    
+
     if int(sheet[5:]) > int(sheets[-1][5:]):
         print(f'Error : This file has {sheets[-1][5:]} sheets! {sheet} does not exist!')
         return
-    
+
     data = pd.read_excel(directory, sheet_name = sheet)
-    
+
     v = np.array(data['Voltage'])
-    t = np.array(data['Time']) 
+    t = np.array(data['Time'])
     if cut != 0:
         t = np.array(t[v<cut])
         v = v[v<cut]
     v_error = np.array([error(val) for val in v])
-    
+
     T = data['T']
     T_value = np.mean(T)
     T_error = abs(T[1]-T[0])/2
@@ -120,7 +120,7 @@ def plotSheet(directory, sheet, initial, f = singleExp, cut = 0, save = False):
     v_unit = "mVpp"
     T_unit = "K"
     f_unit = "Hz"
-    
+
     resval,rescov = curve_fit(f, t, v, initial, sigma = v_error)
     reserr = np.sqrt(np.diag(rescov))
     dof = len(v) - len(initial)
@@ -128,10 +128,10 @@ def plotSheet(directory, sheet, initial, f = singleExp, cut = 0, save = False):
 
     Q_value = f_0*resval[1]*np.pi
     Q_error = Q_value*np.sqrt( (reserr[0]/resval[0])**2 + (errf_0/f_0)**2 )
-    
+
     h = max([abs((max(t)-min(t))/1000),1])
     fit_time = np.arange(min(t), max(t)+h, h)
-    fit_amplitude = f(fit_time, *resval) 
+    fit_amplitude = f(fit_time, *resval)
 
     fig = plt.figure(figsize=(6,4), dpi=100);
     fig.suptitle(r"Data from {0} of {1}".format(sheet, directory[-10:-5]))
@@ -157,5 +157,5 @@ def plotSheet(directory, sheet, initial, f = singleExp, cut = 0, save = False):
     plt.grid()
     plt.show()
 
-    if save == True:
-        plt.savefig(r"Plots/ExpConst/Data_{0}_{1}".format(sheet, directory[-10:-5]), dpi = 600)
+    if save != '':
+        plt.savefig(save + r"/Data_{0}_{1}".format(sheet, directory[-10:-5]), dpi = 600)
