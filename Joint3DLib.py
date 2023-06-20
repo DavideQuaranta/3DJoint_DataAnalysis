@@ -3,6 +3,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+
+t_unit = "s"
+v_unit = "mVpp"
+T_unit = "K"
+f_unit = "Hz"
+
+
 # # Definition of the function to add uncertainty # #
 def error(value):
     if value >= 1000:
@@ -35,7 +42,7 @@ def ExpConst(x, a, tau, c):
     return a*np.exp(-x/tau) + c
 
 
-def fitSheet(directory, sheet, initial, f = singleExp, cut = None, verbose = False):
+def fitSheet(directory, sheet, initial, f = singleExp, cut = 0, verbose = False):
     file = pd.ExcelFile(directory)
     sheets = file.sheet_names
 
@@ -60,11 +67,6 @@ def fitSheet(directory, sheet, initial, f = singleExp, cut = None, verbose = Fal
 
     f_0 = data['f0'][0]
     errf_0 = (0.003/100)*f_0
-
-    t_unit = "s"
-    v_unit = "mVpp"
-    T_unit = "K"
-    f_unit = "Hz"
 
     resval,rescov = curve_fit(f, t, v, initial, sigma = v_error)
     reserr = np.sqrt(np.diag(rescov))
@@ -112,14 +114,9 @@ def plotSheet(directory, sheet, initial, f = singleExp, cut = 0, save = ''):
     T_error = abs(T[1]-T[0])/2
 
     f_0 = data['f0'][0]
-    range=12.5 #Hz
-    N_lines=400
+    range = 12.5 #Hz
+    N_lines = 400
     errf_0 = (range/N_lines)/np.sqrt(12)
-
-    t_unit = "s"
-    v_unit = "mVpp"
-    T_unit = "K"
-    f_unit = "Hz"
 
     resval,rescov = curve_fit(f, t, v, initial, sigma = v_error)
     reserr = np.sqrt(np.diag(rescov))
@@ -159,3 +156,17 @@ def plotSheet(directory, sheet, initial, f = singleExp, cut = 0, save = ''):
 
     if save != '':
         plt.savefig(save + r"/Data_{0}_{1}".format(sheet, directory[-10:-5]), dpi = 600)
+
+        
+def plotQ(Q, errQ, T, errT, title):
+    # # Figure of all data # #
+    fig = plt.figure();
+    fig.suptitle(title, size = 15)
+    plt.grid()
+    plt.xlabel(r"$T$ ({0})".format(T_unit), size = 10)
+    plt.ylabel(r"$Q$", size = 10)
+    plt.errorbar(T, Q, yerr=errQ,xerr=errT, fmt=".b", capsize=2,
+                 alpha = 0.65)
+    plt.tight_layout()
+    plt.show()
+    return fig
