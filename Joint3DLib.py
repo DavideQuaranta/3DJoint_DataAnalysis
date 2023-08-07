@@ -160,13 +160,10 @@ def plotSheet(directory, sheet, initial, f = singleExp, cut = 0, save = ''):
         
 def plotQ(Q, errQ, T, errT, title):
     # # Figure of all data # #
-    fig = plt.figure();
-    fig.suptitle(title, size = 15)
+    plt.title(title, size = 15)
     plt.grid()
     plt.xlabel(r"$T$ ({0})".format(T_unit), size = 10)
     plt.ylabel(r"$Q$", size = 10)
     plt.errorbar(T, Q, yerr=errQ,xerr=errT, fmt=".b", capsize=2,
-                 alpha = 0.65)
+                 alpha = 0.65, zorder = 0)
     plt.tight_layout()
-    plt.show()
-    return fig
